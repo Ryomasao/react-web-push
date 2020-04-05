@@ -1,18 +1,56 @@
 import React from "react";
 import "./App.css";
-import firebase from "./services/push";
+
+import { subscribe, registerSubscription, push } from "./services/subscribe";
 
 function App() {
-  const handleClick = async () => {
-    const push = firebase.functions().httpsCallable("/push");
-    await push().catch((error) => {
-      console.error(error);
-    });
+  const [subscription, setSubscription] = React.useState(null);
+  const [worker, setWorker] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!("serviceWorker" in navigator && "PushManager" in window)) {
+      return;
+    }
+
+    async function fetchWorker() {
+      const sw = await navigator.serviceWorker.ready;
+      const sub = await sw.pushManager.getSubscription();
+      setWorker(sw);
+      setSubscription(sub);
+    }
+    fetchWorker();
+  }, []);
+
+  const handlePush = () => {
+    push();
+  };
+
+  const handleUnsubscribe = async () => {
+    await subscription.unsubscribe();
+    setSubscription(null);
+  };
+
+  const handleSubscribe = async () => {
+    const sub = await subscribe(worker);
+    await registerSubscription(sub);
+    setSubscription(sub);
   };
 
   return (
     <div className="App">
-      <button onClick={handleClick}>push</button>
+      {subscription !== null ? (
+        <div>
+          <h1>Now You will be able to receive push notifycation.</h1>
+          <button onClick={handleUnsubscribe}>UNSUBSCRIBE</button>
+          <div>{JSON.stringify(subscription)}</div>
+        </div>
+      ) : (
+        <div>
+          <h1>You need subscribe to receive push notifycation.</h1>
+          <button onClick={handleSubscribe}>SUBSCRIBE</button>
+        </div>
+      )}
+      <button onClick={handlePush}>PUSH</button>
     </div>
   );
 }

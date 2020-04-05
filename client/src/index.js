@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 
-import { Woker } from "./push/setting";
+import { register } from "./serviceWorker";
 
 ReactDOM.render(
   <React.StrictMode>
@@ -12,4 +12,4 @@ ReactDOM.render(
   document.getElementById("root")
 );
 
-new Woker().registe();
+register();
