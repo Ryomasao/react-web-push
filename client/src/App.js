@@ -6,9 +6,11 @@ import { subscribe, registerSubscription, push } from "./services/subscribe";
 function App() {
   const [subscription, setSubscription] = React.useState(null);
   const [worker, setWorker] = React.useState(null);
+  const [isError, setIsError] = React.useState(null);
 
   React.useEffect(() => {
     if (!("serviceWorker" in navigator && "PushManager" in window)) {
+      setIsError(true);
       return;
     }
 
@@ -35,6 +37,12 @@ function App() {
     await registerSubscription(sub);
     setSubscription(sub);
   };
+
+  if (isError) {
+    return (
+      <div className="App"> this Browser dosen`t support Push Manager</div>
+    );
+  }
 
   return (
     <div className="App">
